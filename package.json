@@ -1,0 +1,40 @@
+{
+  "name": "vtx-sync",
+  "version": "1.0.0",
+  "description": "Automated sync service for vehicle compliance data from Pacific Track to VTX Uploads",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "puppeteer",
+      "esbuild"
+    ]
+  },
+  "keywords": [
+    "sync",
+    "automation",
+    "puppeteer"
+  ],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.28.0",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.93.1",
+    "axios": "^1.13.3",
+    "dotenv": "^17.2.3",
+    "node-cron": "^4.2.1",
+    "puppeteer": "^24.36.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "@types/node-cron": "^3.0.11",
+    "nodemon": "^3.1.11",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
