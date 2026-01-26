@@ -1,3 +1,6 @@
+// Load environment variables FIRST, before any other imports
+import 'dotenv/config';
+
 import { config } from './config.js';
 import { logger, generateRunId } from './utils/logger.js';
 import { exportFromPacificTrack } from './services/exporter.js';
@@ -6,7 +9,7 @@ async function main() {
   const runId = generateRunId();
 
   logger.info('VTX Sync Service starting...', { runId });
-  logger.info(`Environment: ${config.NODE_ENV}`, { runId });
+  logger.debug(`Environment: ${config.NODE_ENV}`, { runId });
 
   try {
     // Test the export functionality

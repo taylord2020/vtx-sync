@@ -1,7 +1,4 @@
-import dotenv from 'dotenv';
-
-// Load environment variables from .env file
-dotenv.config();
+// Note: dotenv is loaded in index.ts before this module is imported
 
 export interface Config {
   // Pacific Track credentials
