@@ -1032,6 +1032,8 @@ Add final testing utilities and monitoring:
      }
    }
    ```
+   
+   **Note**: The healthcheck configuration was temporarily removed from railway.json to prevent deployment failures before the endpoint was implemented. Restore these settings once the healthcheck endpoint is implemented in this step.
 
 Tests to complete before marking done:
 1. Run scheduler locally
