@@ -1138,6 +1138,63 @@ Mark this step complete only after all tests pass.
 
 ---
 
+## Post-Deployment Fixes
+
+### Dockerfile Screenshots Directory Fix
+**Issue**: Failure screenshots were crashing the app because the `/app/screenshots` directory didn't exist in the Docker container.
+
+**Fix**: Added `RUN mkdir -p /app/screenshots` to the Dockerfile after setting the working directory.
+
+**Location**: `Dockerfile` line ~30
+
+**Impact**: Prevents crashes when attempting to save error screenshots for debugging.
+
+### Graceful Screenshot Error Handling
+**Issue**: Screenshot save failures were masking the actual login/export errors, making debugging difficult.
+
+**Fix**: Wrapped all `page.screenshot()` calls in try/catch blocks that:
+- Log warnings if screenshot fails
+- Don't throw errors - allow the original error to propagate
+- Preserve error context for debugging
+
+**Location**: `src/services/pacificTrack.ts` - all screenshot calls now have error handling
+
+**Impact**: Real errors (login failures, navigation issues) are now visible in logs even if screenshot saving fails.
+
+### Circuit Breaker Pattern
+**Issue**: Continuous failures could cause excessive requests and server overload.
+
+**Fix**: Implemented circuit breaker pattern that:
+- Tracks consecutive failures in memory
+- Opens circuit after 5 consecutive failures (configurable via `CIRCUIT_BREAKER_THRESHOLD`)
+- Disables syncs for 1 hour when circuit is open (configurable via `CIRCUIT_BREAKER_RESET_HOURS`)
+- Auto-resets after timeout period
+- Immediately closes on successful sync
+
+**Location**: 
+- `src/utils/circuitBreaker.ts` - circuit breaker implementation
+- `src/scheduler.ts` - integration with sync scheduler
+
+**Impact**: Prevents cascading failures and server overload during extended outages.
+
+### Railway Environment Configuration Notes
+
+**NODE_ENV**: Ensure `NODE_ENV=production` is set in Railway environment variables. This ensures:
+- JSON-structured logs (easier to parse)
+- Production-optimized error handling
+- Proper logging levels
+
+**Special Characters in Passwords**: Environment variable values containing special characters (such as `&`, `#`, `!`, `@`, `*`, `$`, etc.) must be wrapped in quotes in Railway's environment variable settings.
+
+**Example**:
+```
+SERVICE_ACCOUNT_PASSWORD="J&2Kr#v!@@N3K*AR"
+```
+
+Without quotes, special characters may be interpreted by the shell or truncated, causing authentication failures.
+
+---
+
 ## Completion Checklist
 
 After all steps are complete, verify:

@@ -8,6 +8,7 @@ import { logger, generateRunId } from './utils/logger.js';
 import { config } from './config.js';
 import { runSyncWithRetry } from './services/retry.js';
 import { sendFailureAlert } from './services/notifier.js';
+import { isCircuitOpen, recordSuccess, recordFailure, getStatus } from './utils/circuitBreaker.js';
 
 /**
  * Flag to prevent overlapping sync runs
@@ -102,6 +103,17 @@ export function startScheduler(): cron.ScheduledTask {
         return;
       }
 
+      // Check if circuit breaker is open
+      if (isCircuitOpen()) {
+        const status = getStatus();
+        logger.warn('Skipping sync: circuit breaker is open', {
+          consecutiveFailures: status.consecutiveFailures,
+          openedAt: status.openedAt?.toISOString(),
+          willResetAt: status.willResetAt?.toISOString(),
+        });
+        return;
+      }
+
       // Set running flag
       isRunning = true;
       const runId = generateRunId();
@@ -127,6 +139,9 @@ export function startScheduler(): cron.ScheduledTask {
 
         // Handle result
         if (result.success) {
+          // Record success to reset circuit breaker
+          recordSuccess();
+          
           const retryNote = result.wasRetry ? ' (succeeded on retry)' : '';
           logger.info(`Scheduled sync completed successfully${retryNote}`, {
             runId: result.runId,
@@ -137,6 +152,9 @@ export function startScheduler(): cron.ScheduledTask {
             wasRetry: result.wasRetry,
           });
         } else {
+          // Record failure for circuit breaker
+          recordFailure();
+          
           const retryNote = result.isRetryExhausted ? ' (retry exhausted)' : '';
           logger.error(`Scheduled sync failed${retryNote}`, {
             runId: result.runId,

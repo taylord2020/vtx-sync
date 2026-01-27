@@ -28,6 +28,9 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 # Set working directory
 WORKDIR /app
 
+# Create screenshots directory
+RUN mkdir -p /app/screenshots
+
 # Install pnpm globally
 RUN npm install -g pnpm
 

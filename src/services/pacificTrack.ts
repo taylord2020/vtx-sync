@@ -110,9 +110,16 @@ export async function login(page: Page, runId: string): Promise<boolean> {
       }
       
       // Take screenshot of failed login
-      const screenshotPath = path.join(SCREENSHOTS_DIR, `login-failed-${runId}.png`);
-      await page.screenshot({ path: screenshotPath, fullPage: true });
-      logger.error('Login failed, screenshot saved', { runId, path: screenshotPath });
+      try {
+        const screenshotPath = path.join(SCREENSHOTS_DIR, `login-failed-${runId}.png`);
+        await page.screenshot({ path: screenshotPath, fullPage: true });
+        logger.error('Login failed, screenshot saved', { runId, path: screenshotPath });
+      } catch (screenshotError) {
+        logger.warn('Failed to save login failure screenshot', { 
+          runId, 
+          error: screenshotError instanceof Error ? screenshotError.message : String(screenshotError)
+        });
+      }
       
       throw new PacificTrackError(errorMessage, 'login');
     }
@@ -131,8 +138,11 @@ export async function login(page: Page, runId: string): Promise<boolean> {
       const screenshotPath = path.join(SCREENSHOTS_DIR, `login-error-${runId}.png`);
       await page.screenshot({ path: screenshotPath, fullPage: true });
       logger.error('Login error, screenshot saved', { runId, path: screenshotPath });
-    } catch {
-      // Ignore screenshot errors
+    } catch (screenshotError) {
+      logger.warn('Failed to save login error screenshot', { 
+        runId, 
+        error: screenshotError instanceof Error ? screenshotError.message : String(screenshotError)
+      });
     }
     
     // Wrap other errors
@@ -164,9 +174,16 @@ export async function navigateToVehicles(page: Page, runId: string): Promise<boo
     
     if (!currentUrl.includes('/carb/vehicles')) {
       // Take screenshot for debugging
-      const screenshotPath = path.join(SCREENSHOTS_DIR, `navigation-failed-${runId}.png`);
-      await page.screenshot({ path: screenshotPath, fullPage: true });
-      logger.error('Navigation failed - unexpected URL', { runId, url: currentUrl, path: screenshotPath });
+      try {
+        const screenshotPath = path.join(SCREENSHOTS_DIR, `navigation-failed-${runId}.png`);
+        await page.screenshot({ path: screenshotPath, fullPage: true });
+        logger.error('Navigation failed - unexpected URL', { runId, url: currentUrl, path: screenshotPath });
+      } catch (screenshotError) {
+        logger.warn('Failed to save navigation failure screenshot', { 
+          runId, 
+          error: screenshotError instanceof Error ? screenshotError.message : String(screenshotError)
+        });
+      }
       
       throw new PacificTrackError(`Navigation failed: ended up at ${currentUrl} instead of vehicles page`, 'navigation');
     }
@@ -197,8 +214,11 @@ export async function navigateToVehicles(page: Page, runId: string): Promise<boo
       const screenshotPath = path.join(SCREENSHOTS_DIR, `navigation-error-${runId}.png`);
       await page.screenshot({ path: screenshotPath, fullPage: true });
       logger.error('Navigation error, screenshot saved', { runId, path: screenshotPath });
-    } catch {
-      // Ignore screenshot errors
+    } catch (screenshotError) {
+      logger.warn('Failed to save navigation error screenshot', { 
+        runId, 
+        error: screenshotError instanceof Error ? screenshotError.message : String(screenshotError)
+      });
     }
     
     // Wrap other errors
@@ -226,8 +246,16 @@ export async function triggerExport(page: Page, runId: string): Promise<boolean>
       // Try alternative selectors
       const altButton = await page.$('button[id*="action"], .dropdown-toggle');
       if (!altButton) {
-        const screenshotPath = path.join(SCREENSHOTS_DIR, `export-nobutton-${runId}.png`);
-        await page.screenshot({ path: screenshotPath, fullPage: true });
+        try {
+          const screenshotPath = path.join(SCREENSHOTS_DIR, `export-nobutton-${runId}.png`);
+          await page.screenshot({ path: screenshotPath, fullPage: true });
+          logger.error('Could not find Actions button, screenshot saved', { runId, path: screenshotPath });
+        } catch (screenshotError) {
+          logger.warn('Failed to save export button error screenshot', { 
+            runId, 
+            error: screenshotError instanceof Error ? screenshotError.message : String(screenshotError)
+          });
+        }
         throw new PacificTrackError('Could not find Actions button', 'export');
       }
       await altButton.click();
@@ -303,8 +331,16 @@ export async function triggerExport(page: Page, runId: string): Promise<boolean>
     });
     
     if (!clicked.clicked) {
-      const screenshotPath = path.join(SCREENSHOTS_DIR, `export-noexport-${runId}.png`);
-      await page.screenshot({ path: screenshotPath, fullPage: true });
+      try {
+        const screenshotPath = path.join(SCREENSHOTS_DIR, `export-noexport-${runId}.png`);
+        await page.screenshot({ path: screenshotPath, fullPage: true });
+        logger.error('Could not find Export option, screenshot saved', { runId, path: screenshotPath });
+      } catch (screenshotError) {
+        logger.warn('Failed to save export option error screenshot', { 
+          runId, 
+          error: screenshotError instanceof Error ? screenshotError.message : String(screenshotError)
+        });
+      }
       throw new PacificTrackError('Could not find Export option in dropdown', 'export');
     }
     
@@ -333,8 +369,11 @@ export async function triggerExport(page: Page, runId: string): Promise<boolean>
       const screenshotPath = path.join(SCREENSHOTS_DIR, `export-error-${runId}.png`);
       await page.screenshot({ path: screenshotPath, fullPage: true });
       logger.error('Export trigger error, screenshot saved', { runId, path: screenshotPath });
-    } catch {
-      // Ignore screenshot errors
+    } catch (screenshotError) {
+      logger.warn('Failed to save export error screenshot', { 
+        runId, 
+        error: screenshotError instanceof Error ? screenshotError.message : String(screenshotError)
+      });
     }
     
     // Wrap other errors

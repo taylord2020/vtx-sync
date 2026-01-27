@@ -167,6 +167,15 @@ A Node.js service running on Railway that:
 - **FR-6.4**: Logs viewable in Railway dashboard
 - **FR-6.5**: Log format: JSON for easy parsing
 
+### FR-7: Circuit Breaker
+- **FR-7.1**: Track consecutive sync failures in memory
+- **FR-7.2**: After 5 consecutive failures, circuit breaker opens
+- **FR-7.3**: When circuit is open, syncs are disabled for 1 hour to prevent server overload
+- **FR-7.4**: Circuit breaker auto-resets after 1 hour and resumes normal operation
+- **FR-7.5**: Successful sync immediately closes the circuit and resets failure count
+- **FR-7.6**: Circuit breaker state is logged (open/closed, failure count, reset time)
+- **FR-7.7**: Configurable via `CIRCUIT_BREAKER_THRESHOLD` (default: 5) and `CIRCUIT_BREAKER_RESET_HOURS` (default: 1)
+
 ---
 
 ## Non-Functional Requirements
@@ -217,6 +226,8 @@ A Node.js service running on Railway that:
 | `NODE_ENV` | Environment | production |
 | `SYNC_DELAY_MAX_MS` | Max random delay before sync (ms) | 60000 |
 | `USER_AGENT` | Browser user agent for identification | CleanTruckCheckPro-Sync/1.0 |
+| `CIRCUIT_BREAKER_THRESHOLD` | Consecutive failures before opening circuit | 5 |
+| `CIRCUIT_BREAKER_RESET_HOURS` | Hours before circuit auto-resets | 1 |
 
 ### Cron Schedule
 ```
