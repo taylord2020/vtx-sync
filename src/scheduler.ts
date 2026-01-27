@@ -9,11 +9,19 @@ import { config } from './config.js';
 import { runSyncWithRetry } from './services/retry.js';
 import { sendFailureAlert } from './services/notifier.js';
 import { isCircuitOpen, recordSuccess, recordFailure, getStatus } from './utils/circuitBreaker.js';
+import { updateLastRun } from './utils/healthcheck.js';
+import type { SyncResult } from './types.js';
 
 /**
  * Flag to prevent overlapping sync runs
  */
 let isRunning = false;
+
+/**
+ * Export last run information for healthcheck
+ */
+export let lastRunTime: Date | null = null;
+export let lastRunStatus: 'success' | 'failure' | null = null;
 
 /**
  * Get a random delay between 0 and SYNC_DELAY_MAX_MS
@@ -181,6 +189,11 @@ export function startScheduler(): cron.ScheduledTask {
             }
           }
         }
+
+        // Update healthcheck tracking
+        lastRunTime = result.endTime || new Date();
+        lastRunStatus = result.success ? 'success' : 'failure';
+        updateLastRun(result);
       } catch (error) {
         // Unexpected error in scheduler itself
         logger.error('Unexpected error in scheduled sync', {

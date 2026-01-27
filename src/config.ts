@@ -24,6 +24,7 @@ export interface Config {
   SYNC_DELAY_MAX_MS: number;
   RETRY_DELAY_MS: number;
   USER_AGENT: string;
+  PORT: number;
 }
 
 function getEnvVar(name: string, defaultValue?: string): string {
@@ -69,6 +70,7 @@ function createConfig(): Config {
     SYNC_DELAY_MAX_MS: parseInt(process.env.SYNC_DELAY_MAX_MS ?? '60000', 10),
     RETRY_DELAY_MS: parseInt(process.env.RETRY_DELAY_MS ?? '300000', 10), // Default: 5 minutes
     USER_AGENT: process.env.USER_AGENT ?? 'CleanTruckCheckPro-Sync/1.0 (automated; contact: team@smartctc.com)',
+    PORT: parseInt(process.env.PORT ?? '3000', 10),
   };
 }
 

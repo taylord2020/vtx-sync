@@ -6,6 +6,7 @@ import { logger, generateRunId } from './utils/logger.js';
 import { runSyncWithRetry } from './services/retry.js';
 import { sendFailureAlert } from './services/notifier.js';
 import { startScheduler } from './scheduler.js';
+import { startHealthcheckServer, updateLastRun } from './utils/healthcheck.js';
 
 /**
  * Run a single sync and exit
@@ -17,6 +18,9 @@ async function runSingleSync(): Promise<void> {
   logger.debug(`Environment: ${config.NODE_ENV}`, { runId });
 
   const result = await runSyncWithRetry(runId);
+
+  // Update healthcheck tracking
+  updateLastRun(result);
 
   if (result.success) {
     const retryNote = result.wasRetry ? ' (succeeded on retry)' : '';
@@ -67,6 +71,9 @@ function runScheduler(): void {
   logger.info('VTX Sync Service starting (scheduler mode)...');
   logger.debug(`Environment: ${config.NODE_ENV}`);
 
+  // Start healthcheck server
+  const healthcheckServer = startHealthcheckServer(config.PORT);
+
   // Start the cron scheduler
   const cronJob = startScheduler();
 
@@ -74,8 +81,11 @@ function runScheduler(): void {
   const shutdown = (signal: string) => {
     logger.info(`Received ${signal}, shutting down gracefully...`);
     cronJob.stop();
-    logger.info('Scheduler stopped');
-    process.exit(0);
+    healthcheckServer.close(() => {
+      logger.info('Healthcheck server stopped');
+      logger.info('Scheduler stopped');
+      process.exit(0);
+    });
   };
 
   process.on('SIGTERM', () => shutdown('SIGTERM'));

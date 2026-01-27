@@ -58,11 +58,27 @@ Edit `.env` with your credentials:
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_SERVICE_KEY` | Supabase anon key |
 | `SERVICE_ACCOUNT_EMAIL` | Sync service Supabase user email |
-| `SERVICE_ACCOUNT_PASSWORD` | Sync service Supabase user password |
+| `SERVICE_ACCOUNT_PASSWORD` | Sync service Supabase user password (see note below) |
 | `VTX_UPLOADS_API_URL` | Backend API base URL |
 | `ALERT_EMAIL` | Email for failure notifications |
 | `TZ` | Timezone for cron schedule (default: America/Los_Angeles) |
 | `NODE_ENV` | Environment (development/production) |
+
+**Important: Passwords with Special Characters**
+
+If your password contains special characters (such as `&`, `#`, `!`, `@`, `*`, `$`, etc.):
+
+- **For local development** (`.env` file): Wrap the password in quotes:
+  ```
+  SERVICE_ACCOUNT_PASSWORD="J&2Kr#v!@@N3K*AR"
+  ```
+
+- **For Railway production**: Do NOT use quotes - enter the raw password directly in the Railway environment variable UI:
+  ```
+  SERVICE_ACCOUNT_PASSWORD=J&2Kr#v!@@N3K*AR
+  ```
+
+Without quotes in local development, special characters may be interpreted by the shell or truncated, causing authentication failures.
 
 ## Running Locally
 
@@ -148,6 +164,8 @@ Cron expression: `0,30 5-22 * * *`
    NODE_ENV=production
    ```
    
+   **Note**: If your `SERVICE_ACCOUNT_PASSWORD` contains special characters, enter the raw password directly in Railway's UI (do NOT wrap in quotes). See the Troubleshooting section for more details.
+   
    Optional (for email notifications):
    ```
    RESEND_API_KEY=<resend-api-key>
@@ -213,6 +231,13 @@ docker run \
 - Verify Pacific Track credentials are correct
 - Verify Supabase service account credentials
 - Check VTX Uploads API URL is correct
+
+**Authentication failures (Invalid login credentials)**:
+- If your password contains special characters (`&`, `#`, `!`, `@`, `*`, `$`, etc.):
+  - **Local development**: Ensure password is wrapped in quotes in `.env` file: `SERVICE_ACCOUNT_PASSWORD="pass&word#123"`
+  - **Railway production**: Do NOT use quotes - enter the raw password directly in Railway's environment variable UI
+- Verify the password matches exactly what was set in Supabase
+- Check for any whitespace or hidden characters in the password field
 
 **Timezone issues**:
 - Ensure `TZ=America/Los_Angeles` is set in Railway environment variables
