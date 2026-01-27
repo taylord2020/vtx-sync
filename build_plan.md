@@ -417,6 +417,62 @@ Tests to complete before marking done:
 Mark this step complete only after all tests pass.
 ```
 
+**Implementation Notes** (added after completion):
+
+This step was challenging due to Puppeteer download capture complexities. Key learnings:
+
+1. **CDP Download Behavior Setup**:
+   - `Page.setDownloadBehavior` is deprecated/unreliable in newer Puppeteer
+   - Use `Browser.setDownloadBehavior` via CDP session instead:
+     ```typescript
+     const client = await page.createCDPSession();
+     await client.send('Browser.setDownloadBehavior', {
+       behavior: 'allow',
+       downloadPath: downloadPath,
+       eventsEnabled: true,  // Enable download progress events
+     });
+     ```
+   - The `eventsEnabled: true` flag enables `Browser.downloadWillBegin` and `Browser.downloadProgress` events which are helpful for logging
+
+2. **Export Button Click - Critical Issue**:
+   - The dropdown contains multiple elements with "Export" text: `DIV`, `LI`, `BUTTON`, `SPAN`
+   - Clicking the `LI` container does NOT trigger the export action
+   - Must click the actual `BUTTON` element specifically
+   - Solution: Prioritize clicking by element type: `BUTTON` > `A` > `LI`
+   ```typescript
+   // First, try to find a BUTTON with Export text
+   const buttons = document.querySelectorAll('button');
+   for (const btn of buttons) {
+     if (btn.textContent?.trim().toLowerCase() === 'export') {
+       btn.click();
+       return { clicked: true };
+     }
+   }
+   ```
+
+3. **File System Polling Approach**:
+   - CDP download events tell you when download starts/completes
+   - But still need file system polling to read the actual file
+   - Poll every 500ms, verify file size is stable before reading
+   - Check first 2 bytes are `PK` (0x50, 0x4B) to verify valid XLSX/ZIP format
+
+4. **Debugging Techniques**:
+   - Add `HEADLESS=false` env var support to run in headed mode for visual debugging
+   - Take screenshots at key moments: dropdown open, post-export click, on error
+   - Log all elements found with "export" text to understand DOM structure
+   - The dropdown screenshot was crucial for identifying the button click issue
+
+5. **Common Pitfalls**:
+   - `:has-text()` is Playwright syntax, NOT valid CSS - don't use with Puppeteer
+   - Request interception (`page.setRequestInterception(true)`) can interfere with downloads
+   - Windows paths work fine with CDP - no need to convert to forward slashes
+   - Clean up temp directories in `finally` block to prevent accumulation
+
+6. **Test Verification**:
+   - Successful run shows: `Download starting` → `Download completed` → file captured
+   - File size should be ~78-80KB for the vehicles export
+   - Total export time is typically 15-25 seconds
+
 ---
 
 ### Step 7: VTX Uploads API Client
