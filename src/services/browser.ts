@@ -8,8 +8,11 @@ import { logger } from '../utils/logger.js';
 export async function launchBrowser(runId?: string): Promise<Browser> {
   logger.info('Launching browser...', { runId });
 
+  // Use headed mode if HEADLESS=false is set (for debugging)
+  const headless = process.env.HEADLESS !== 'false';
+
   const browser = await puppeteer.launch({
-    headless: true,
+    headless,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',

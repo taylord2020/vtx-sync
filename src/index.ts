@@ -12,14 +12,17 @@ async function main() {
   logger.debug(`Environment: ${config.NODE_ENV}`, { runId });
 
   try {
-    // Test the export functionality
+    // Run the export from Pacific Track
     const result = await exportFromPacificTrack(runId);
     
-    if (result) {
-      logger.info('Export returned file', { runId, filename: result.filename, size: result.size });
-    } else {
-      logger.info('Export returned null (skeleton mode)', { runId });
-    }
+    logger.info('Export completed', { 
+      runId, 
+      filename: result.filename, 
+      size: result.size,
+      sizeKB: Math.round(result.size / 1024)
+    });
+    
+    // TODO: Step 7+ will add upload to VTX Uploads API
     
     logger.info('VTX Sync Service completed successfully', { runId });
     process.exit(0);

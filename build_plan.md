@@ -304,7 +304,7 @@ Mark this step complete only after all tests pass.
 ---
 
 ### Step 5: Pacific Track Export - Navigate and Export
-**Status**: [ ] Complete
+**Status**: [x] Complete
 
 **Cursor Agent Prompt**:
 ```
@@ -355,7 +355,7 @@ Mark this step complete only after all tests pass.
 ---
 
 ### Step 6: Pacific Track Export - Download Capture
-**Status**: [ ] Complete
+**Status**: [x] Complete
 
 **Cursor Agent Prompt**:
 ```
