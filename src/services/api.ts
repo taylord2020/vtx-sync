@@ -18,6 +18,15 @@ import type { UploadResult } from '../types.js';
  */
 export async function authenticateSupabase(runId: string): Promise<string> {
   logger.info('Authenticating with Supabase...', { runId });
+  
+  // Debug: Log what we're using (without exposing password)
+  logger.debug('Supabase auth attempt', {
+    runId,
+    email: config.SERVICE_ACCOUNT_EMAIL,
+    emailLength: config.SERVICE_ACCOUNT_EMAIL.length,
+    passwordLength: config.SERVICE_ACCOUNT_PASSWORD.length,
+    supabaseUrl: config.SUPABASE_URL,
+  });
 
   try {
     const supabase = createClient(config.SUPABASE_URL, config.SUPABASE_SERVICE_KEY);
@@ -28,6 +37,13 @@ export async function authenticateSupabase(runId: string): Promise<string> {
     });
 
     if (error) {
+      // Log more detailed error information
+      logger.error('Supabase auth error details', {
+        runId,
+        errorMessage: error.message,
+        errorStatus: error.status,
+        errorName: error.name,
+      });
       const authError = new Error(`Supabase authentication failed: ${error.message}`);
       (authError as any).category = 'auth';
       throw authError;

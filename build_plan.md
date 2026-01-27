@@ -528,6 +528,14 @@ Tests to complete before marking done:
 
 Note: Full upload test will be done after integrating with export flow.
 
+**Implementation Notes** (added after completion):
+
+**Important: Special Characters in .env Values**
+- Environment variable values containing special characters (such as `&`, `#`, `!`, `@`, `*`, `$`, etc.) must be wrapped in quotes in the `.env` file
+- Example: `SERVICE_ACCOUNT_PASSWORD="J&2Kr#v!@@N3K*AR"` (with quotes)
+- Without quotes, special characters may be interpreted by the shell or truncated, causing authentication failures
+- If you see "Invalid login credentials" errors and the password contains special characters, check that it's properly quoted in `.env`
+
 Mark this step complete only after all tests pass.
 ```
 
@@ -594,7 +602,7 @@ Mark this step complete only after all tests pass.
 ---
 
 ### Step 9: Retry Logic
-**Status**: [ ] Complete
+**Status**: [x] Complete
 
 **Cursor Agent Prompt**:
 ```

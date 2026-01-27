@@ -19,6 +19,9 @@ export interface SyncResult {
   newRecords?: number;
   duplicates?: number;
   totalRows?: number;
+  wasRetry?: boolean;
+  isRetryExhausted?: boolean;
+  originalError?: string;
 }
 
 /**
