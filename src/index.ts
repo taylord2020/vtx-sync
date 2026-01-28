@@ -5,6 +5,7 @@ import { config } from './config.js';
 import { logger, generateRunId } from './utils/logger.js';
 import { runSyncWithRetry } from './services/retry.js';
 import { sendFailureAlert } from './services/notifier.js';
+import { sendSuccessEmail, sendFailureEmail } from './services/emailService.js';
 import { startScheduler } from './scheduler.js';
 import { startHealthcheckServer, updateLastRun } from './utils/healthcheck.js';
 
@@ -32,6 +33,18 @@ async function runSingleSync(): Promise<void> {
       totalRows: result.totalRows,
       wasRetry: result.wasRetry,
     });
+
+    // Send success email notification
+    try {
+      await sendSuccessEmail(result);
+    } catch (emailError) {
+      // Don't let email failures break the sync
+      logger.error('Failed to send success email notification', {
+        runId: result.runId,
+        error: emailError instanceof Error ? emailError.message : String(emailError),
+      });
+    }
+
     process.exit(0);
   } else {
     const retryNote = result.isRetryExhausted ? ' (retry exhausted)' : '';
@@ -56,6 +69,17 @@ async function runSingleSync(): Promise<void> {
         logger.error('Failed to send failure alert', {
           runId: result.runId,
           error: alertError instanceof Error ? alertError.message : String(alertError),
+        });
+      }
+
+      // Send failure email notification
+      try {
+        await sendFailureEmail(result);
+      } catch (emailError) {
+        // Don't let email failures break the sync
+        logger.error('Failed to send failure email notification', {
+          runId: result.runId,
+          error: emailError instanceof Error ? emailError.message : String(emailError),
         });
       }
     }

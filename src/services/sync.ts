@@ -84,6 +84,9 @@ export async function runSync(runId: string): Promise<SyncResult> {
       });
     }
 
+    // Note: Success and failure emails are sent from index.ts and scheduler.ts
+    // after retry logic completes, to ensure we only send one email per sync run
+
     return result;
 
   } catch (error) {
@@ -120,6 +123,9 @@ export async function runSync(runId: string): Promise<SyncResult> {
       duration: `${Math.round(duration / 1000)}s`,
       stack: error instanceof Error ? error.stack : undefined,
     });
+
+    // Note: Failure emails are sent from index.ts and scheduler.ts after retry logic completes
+    // This ensures we only send emails when retry is exhausted, not on initial failures
 
     return result;
   }

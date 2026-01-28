@@ -18,6 +18,10 @@ export interface Config {
 
   // Notifications
   ALERT_EMAIL: string;
+  RESEND_API_KEY?: string;
+  NOTIFICATION_EMAIL_TO: string;
+  NOTIFICATION_EMAIL_FROM: string;
+  ENABLE_EMAIL_NOTIFICATIONS: boolean;
 
   // Runtime configuration
   NODE_ENV: string;
@@ -64,6 +68,10 @@ function createConfig(): Config {
 
     // Notifications
     ALERT_EMAIL: getVar('ALERT_EMAIL', 'team@smartctc.com'),
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    NOTIFICATION_EMAIL_TO: getVar('NOTIFICATION_EMAIL_TO', 'team@smartctc.com'),
+    NOTIFICATION_EMAIL_FROM: getVar('NOTIFICATION_EMAIL_FROM', 'vtx-sync@notifications.smartctc.com'),
+    ENABLE_EMAIL_NOTIFICATIONS: process.env.ENABLE_EMAIL_NOTIFICATIONS === 'true',
 
     // Runtime configuration
     NODE_ENV: process.env.NODE_ENV ?? 'development',
