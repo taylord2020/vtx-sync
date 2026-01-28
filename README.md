@@ -63,6 +63,7 @@ Edit `.env` with your credentials:
 | `ALERT_EMAIL` | Email for failure notifications |
 | `TZ` | Timezone for cron schedule (default: America/Los_Angeles) |
 | `NODE_ENV` | Environment (development/production) |
+| `ENABLE_CRON` | Set to `'true'` to enable cron scheduler, `'false'` or unset to disable (default: `false`) |
 
 **Important: Passwords with Special Characters**
 
@@ -87,6 +88,8 @@ Without quotes in local development, special characters may be interpreted by th
 ```bash
 pnpm dev
 ```
+
+**Note**: The cron scheduler is disabled by default (`ENABLE_CRON=false`) when running locally to prevent duplicate syncs while production is also running. When testing locally, you can manually trigger syncs via the `/sync` endpoint (if available) or by running the service in single-run mode with `pnpm dev`.
 
 ### Build for production
 

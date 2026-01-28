@@ -74,16 +74,26 @@ function runScheduler(): void {
   // Start healthcheck server
   const healthcheckServer = startHealthcheckServer(config.PORT);
 
-  // Start the cron scheduler
-  const cronJob = startScheduler();
+  // Start the cron scheduler only if enabled
+  let cronJob: ReturnType<typeof startScheduler> | null = null;
+  if (process.env.ENABLE_CRON === 'true') {
+    logger.info('Cron scheduler enabled');
+    cronJob = startScheduler();
+  } else {
+    logger.info('Cron scheduler disabled (ENABLE_CRON !== true)');
+  }
 
   // Handle graceful shutdown
   const shutdown = (signal: string) => {
     logger.info(`Received ${signal}, shutting down gracefully...`);
-    cronJob.stop();
+    if (cronJob) {
+      cronJob.stop();
+    }
     healthcheckServer.close(() => {
       logger.info('Healthcheck server stopped');
-      logger.info('Scheduler stopped');
+      if (cronJob) {
+        logger.info('Scheduler stopped');
+      }
       process.exit(0);
     });
   };
@@ -92,7 +102,11 @@ function runScheduler(): void {
   process.on('SIGINT', () => shutdown('SIGINT'));
 
   // Keep process alive
-  logger.info('Scheduler is running. Press Ctrl+C to stop.');
+  if (cronJob) {
+    logger.info('Scheduler is running. Press Ctrl+C to stop.');
+  } else {
+    logger.info('Service is running (cron disabled). Press Ctrl+C to stop.');
+  }
 }
 
 async function main() {
