@@ -43,9 +43,9 @@ The sync will automatically retry at the next scheduled time.
 ---
 VTX Sync Service`;
 
-  // For MVP, log the alert instead of sending email
-  // TODO: Implement actual email sending via Resend or Supabase Edge Function
-  logger.warn('ALERT: Would send email to team@smartctc.com', {
+  // Note: Actual email sending is handled by emailService.ts
+  // This function logs the alert for backward compatibility and monitoring
+  logger.warn('ALERT: Failure alert logged (email notifications handled by emailService)', {
     runId: result.runId,
     alertEmail: config.ALERT_EMAIL,
     emailContent,

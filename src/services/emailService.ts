@@ -113,7 +113,18 @@ function generateEmailTemplate(
 }
 
 /**
- * Send success notification email
+ * Send success notification email after a successful sync
+ * 
+ * Sends an HTML-formatted email with sync statistics including:
+ * - Duration
+ * - Total rows processed
+ * - New records added
+ * - Duplicates skipped
+ * - Timestamp
+ * - Retry status (if applicable)
+ * 
+ * @param result - Sync result with success details
+ * @returns Promise that resolves when email is sent (or skipped if disabled)
  */
 export async function sendSuccessEmail(result: SyncResult): Promise<void> {
   if (!isEmailEnabled()) {
@@ -197,7 +208,21 @@ export async function sendSuccessEmail(result: SyncResult): Promise<void> {
 }
 
 /**
- * Send failure notification email
+ * Send failure notification email after sync fails with retry exhausted
+ * 
+ * Sends an HTML-formatted email with failure details including:
+ * - Failed phase
+ * - Error category
+ * - Error message
+ * - Duration
+ * - Timestamp
+ * - Retry exhaustion status
+ * - Original error (if retry was attempted)
+ * 
+ * Only sends if retry is exhausted (isRetryExhausted: true).
+ * 
+ * @param result - Sync result with failure details
+ * @returns Promise that resolves when email is sent (or skipped if disabled)
  */
 export async function sendFailureEmail(result: SyncResult): Promise<void> {
   if (!isEmailEnabled()) {
